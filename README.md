@@ -12,4 +12,4 @@ The latest version of MM AudioTool can be downloaded from [the releases page](ht
 Requires [.NET 8.0](https://dotnet.microsoft.com/en-us/download/dotnet/8.0). You probably already have it installed, but if you get an error about .NET, you need to install it.
 
 ### Credits
-[cktool](https://github.com/sjmerel/ck) for making this all possible
+[Cricket Audio](https://github.com/sjmerel/ck) for making this all possible
