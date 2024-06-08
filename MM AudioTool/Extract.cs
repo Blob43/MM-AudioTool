@@ -45,7 +45,6 @@ namespace MM_AudioTool
 
         private void button2_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(CurrentWorkingDirectory);
             // Initialize the ProcessStartInfo
             ProcessStartInfo startInfo = new ProcessStartInfo();
             string HardcodedProgramPath = @"\Tools\cktool\cktool.exe";
