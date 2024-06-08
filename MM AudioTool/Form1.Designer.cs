@@ -87,9 +87,9 @@
             label3.AutoSize = true;
             label3.Location = new Point(5, 421);
             label3.Name = "label3";
-            label3.Size = new Size(142, 20);
+            label3.Size = new Size(155, 20);
             label3.TabIndex = 5;
-            label3.Text = "Version 1.1 (Helium)";
+            label3.Text = "Version 1.1.1 (Doodle)";
             // 
             // button4
             // 

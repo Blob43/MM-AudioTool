@@ -162,6 +162,7 @@
             Name = "Complie";
             StartPosition = FormStartPosition.CenterParent;
             Text = "Complie";
+            Load += Complie_Load;
             ResumeLayout(false);
             PerformLayout();
         }
