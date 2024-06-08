@@ -82,7 +82,7 @@ namespace MM_AudioTool
             // Initialize the ProcessStartInfo
             ProcessStartInfo startInfo = new ProcessStartInfo();
             string HardcodedProgramPath = @"\tools\cktool\cktool.exe";
-            string MergedPath = System.IO.Path.Combine(CurrentWorkingDirectory, HardcodedProgramPath);
+            string MergedPath = CurrentWorkingDirectory + HardcodedProgramPath;
             startInfo.FileName = MergedPath;
             startInfo.Arguments = "buildbank -verbose " + ExtractCKBPath + " " + ExtractCKBXPath;
 
