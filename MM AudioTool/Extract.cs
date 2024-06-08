@@ -45,38 +45,55 @@ namespace MM_AudioTool
 
         private void button2_Click(object sender, EventArgs e)
         {
-            // Initialize the ProcessStartInfo
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-            string HardcodedProgramPath = @"\Tools\cktool\cktool.exe";
-            string MergedPath = CurrentWorkingDirectory + HardcodedProgramPath;
-            startInfo.FileName = MergedPath;
-            startInfo.Arguments = "extract -verbose " + ExtractCKBPath;
-
-            // Redirect the standard output so that we can capture it
-            startInfo.RedirectStandardOutput = true;
-            startInfo.UseShellExecute = false;
-            startInfo.CreateNoWindow = true;
-
-            // Start the process
-            Process process = new Process
+            try
             {
-                StartInfo = startInfo
-            };
-            process.Start();
+                // Initialize the ProcessStartInfo
+                ProcessStartInfo startInfo = new ProcessStartInfo();
+                string HardcodedProgramPath = @"\Tools\cktool\cktool.exe";
+                string MergedPath = CurrentWorkingDirectory + HardcodedProgramPath;
 
-            // Read the standard output into a multiline string
-            StringBuilder output = new StringBuilder();
-            while (!process.StandardOutput.EndOfStream)
-            {
-                string line = process.StandardOutput.ReadLine();
-                output.AppendLine(line);
+                if (!File.Exists(MergedPath))
+                {
+                    MessageBox.Show("The tool cktool.exe was not found at the expected path: " + MergedPath, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                startInfo.FileName = MergedPath;
+                startInfo.Arguments = "extract -verbose " + ExtractCKBPath;
+
+                // Redirect the standard output so that we can capture it
+                startInfo.RedirectStandardOutput = true;
+                startInfo.UseShellExecute = false;
+                startInfo.CreateNoWindow = true;
+
+                // Start the process
+                Process process = new Process
+                {
+                    StartInfo = startInfo
+                };
+                process.Start();
+
+                // Read the standard output into a multiline string
+                StringBuilder output = new StringBuilder();
+                while (!process.StandardOutput.EndOfStream)
+                {
+                    string line = process.StandardOutput.ReadLine();
+                    output.AppendLine(line);
+                }
+
+                // Wait for the process to exit
+                process.WaitForExit();
+
+                // Output the process standard output to a TextBox or any other control
+                this.richTextBox1.AppendText("\nProcess Output:\n" + output.ToString());
+
+                // Find and rename .wav files
+                FindAndRenameWavFiles();
             }
-
-            // Wait for the process to exit
-            process.WaitForExit();
-
-            // Find and rename .wav files
-            FindAndRenameWavFiles();
+            catch (Exception ex)
+            {
+                MessageBox.Show("An error occurred: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void FindAndRenameWavFiles()
@@ -111,4 +128,3 @@ namespace MM_AudioTool
         }
     }
 }
-

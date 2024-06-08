@@ -27,8 +27,6 @@ namespace MM_AudioTool
         public static string ExtractCKBXPath = "";
         public static string CurrentWorkingDirectory = System.IO.Path.GetDirectoryName(Application.ExecutablePath);
 
-
-
         private void button1_Click(object sender, EventArgs e)
         {
             OpenFileDialog dialog = new OpenFileDialog
@@ -71,12 +69,20 @@ namespace MM_AudioTool
 
         private void button2_Click_1(object sender, EventArgs e)
         {
+            // Check if the paths are empty
+            if (string.IsNullOrWhiteSpace(ExtractCKBPath) || string.IsNullOrWhiteSpace(ExtractCKBXPath))
+            {
+                MessageBox.Show("Both paths must be set before starting the process.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             this.richTextBox1.Text = "This may take a while... (May cause to hang a bit)";
             MessageBox.Show("This may take a while... (May cause to hang a bit)");
+
             // Initialize the ProcessStartInfo
             ProcessStartInfo startInfo = new ProcessStartInfo();
             string HardcodedProgramPath = @"\Tools\cktool\cktool.exe";
-            string MergedPath = CurrentWorkingDirectory + HardcodedProgramPath;
+            string MergedPath = System.IO.Path.Combine(CurrentWorkingDirectory, HardcodedProgramPath);
             startInfo.FileName = MergedPath;
             startInfo.Arguments = "buildbank -verbose " + ExtractCKBPath + " " + ExtractCKBXPath;
 

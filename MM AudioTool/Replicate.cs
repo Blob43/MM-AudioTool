@@ -27,7 +27,6 @@ namespace MM_AudioTool
         public static string ExtractCKBPath = "";
         public static string CurrentWorkingDirectory = System.IO.Path.GetDirectoryName(Application.ExecutablePath);
 
-
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
 
@@ -53,82 +52,99 @@ namespace MM_AudioTool
 
         private void button2_Click(object sender, EventArgs e)
         {
-            // Initialize the ProcessStartInfo
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-            string HardcodedProgramPath = @"\Tools\cktool\cktool.exe";
-            string MergedPath = CurrentWorkingDirectory + HardcodedProgramPath;
-            startInfo.FileName = MergedPath;
-            startInfo.Arguments = "info -verbose " + ExtractCKBPath;
-
-            // Redirect the standard output so that we can capture it
-            startInfo.RedirectStandardOutput = true;
-            startInfo.UseShellExecute = false;
-            startInfo.CreateNoWindow = true;
-
-            // Start the process
-            Process process = new Process();
-            process.StartInfo = startInfo;
-            process.Start();
-
-            // Read the standard output into a multiline string
-            StringBuilder output = new StringBuilder();
-            while (!process.StandardOutput.EndOfStream)
+            try
             {
-                string line = process.StandardOutput.ReadLine();
-                output.AppendLine(line);
+                // Initialize the ProcessStartInfo
+                ProcessStartInfo startInfo = new ProcessStartInfo();
+                string HardcodedProgramPath = @"\Tools\cktool\cktool.exe";
+                string MergedPath = CurrentWorkingDirectory + HardcodedProgramPath;
+                startInfo.FileName = MergedPath;
+                startInfo.Arguments = "info -verbose " + ExtractCKBPath;
+
+                // Redirect the standard output so that we can capture it
+                startInfo.RedirectStandardOutput = true;
+                startInfo.UseShellExecute = false;
+                startInfo.CreateNoWindow = true;
+
+                // Start the process
+                Process process = new Process();
+                process.StartInfo = startInfo;
+                process.Start();
+
+                // Read the standard output into a multiline string
+                StringBuilder output = new StringBuilder();
+                while (!process.StandardOutput.EndOfStream)
+                {
+                    string line = process.StandardOutput.ReadLine();
+                    output.AppendLine(line);
+                }
+
+                // Wait for the process to exit
+                process.WaitForExit();
+
+                // Convert the StringBuilder to a string
+                string stdout = output.ToString();
+
+                // Define regex patterns to extract the required fields
+                string soundPattern = @"sound \d+:([\s\S]*?)(?=sound \d+:|$)";
+                string namePattern = @"name:\s*(\S+)";
+                string formatPattern = @"format:\s*(\d+)";
+                string volumePattern = @"volume:\s*([\d.]+)";
+                string panPattern = @"pan:\s*([\d.]+)";
+                string loopCountPattern = @"loop count:\s*(\d+)";
+
+                // Match all sound blocks
+                var soundMatches = Regex.Matches(stdout, soundPattern);
+
+                // Create the XML document
+                XDocument xmlDocument = new XDocument(new XElement("bank", new XAttribute("name", "da2sound")));
+
+                foreach (Match soundMatch in soundMatches)
+                {
+                    string soundBlock = soundMatch.Groups[1].Value;
+
+                    string name = Regex.Match(soundBlock, namePattern).Groups[1].Value;
+                    string format = Regex.Match(soundBlock, formatPattern).Groups[1].Value;
+                    string volume = Regex.Match(soundBlock, volumePattern).Groups[1].Value;
+                    string pan = Regex.Match(soundBlock, panPattern).Groups[1].Value;
+                    string loopCount = Regex.Match(soundBlock, loopCountPattern).Groups[1].Value;
+
+                    // Use "pcm16" as the format for all sounds
+                    string formatValue = "pcm16";
+
+                    XElement soundElement = new XElement("sound",
+                        new XAttribute("name", name),
+                        new XAttribute("source", name),
+                        new XAttribute("format", formatValue),
+                        new XAttribute("volume", volume),
+                        new XAttribute("pan", pan),
+                        new XAttribute("loopCount", loopCount));
+
+                    xmlDocument.Root.Add(soundElement);
+                }
+
+                // Save the XML document to a file
+                string xmlOutputPath = "output.xml";
+                string updatedPath = ExtractCKBPath.Replace(".ckb", ".ckbx").Trim();
+                string ckbxpath = updatedPath;
+
+                // Check if updatedPath is empty
+                if (string.IsNullOrEmpty(updatedPath))
+                {
+                    throw new ArgumentException("The value cannot be an empty string.", "path");
+                }
+
+                xmlDocument.Save(updatedPath);
+                this.richTextBox1.Text = "Saved to " + updatedPath.ToString();
             }
-
-            // Wait for the process to exit
-            process.WaitForExit();
-
-            // Convert the StringBuilder to a string
-            string stdout = output.ToString();
-
-            // Define regex patterns to extract the required fields
-            string soundPattern = @"sound \d+:([\s\S]*?)(?=sound \d+:|$)";
-            string namePattern = @"name:\s*(\S+)";
-            string formatPattern = @"format:\s*(\d+)";
-            string volumePattern = @"volume:\s*([\d.]+)";
-            string panPattern = @"pan:\s*([\d.]+)";
-            string loopCountPattern = @"loop count:\s*(\d+)";
-
-            // Match all sound blocks
-            var soundMatches = Regex.Matches(stdout, soundPattern);
-
-            // Create the XML document
-            XDocument xmlDocument = new XDocument(new XElement("bank", new XAttribute("name", "da2sound")));
-
-            foreach (Match soundMatch in soundMatches)
+            catch (ArgumentException ex)
             {
-                string soundBlock = soundMatch.Groups[1].Value;
-
-                string name = Regex.Match(soundBlock, namePattern).Groups[1].Value;
-                string format = Regex.Match(soundBlock, formatPattern).Groups[1].Value;
-                string volume = Regex.Match(soundBlock, volumePattern).Groups[1].Value;
-                string pan = Regex.Match(soundBlock, panPattern).Groups[1].Value;
-                string loopCount = Regex.Match(soundBlock, loopCountPattern).Groups[1].Value;
-
-                // Use "pcm16" as the format for all sounds
-                string formatValue = "pcm16";
-
-                XElement soundElement = new XElement("sound",
-                    new XAttribute("name", name),
-                    new XAttribute("source", name),
-                    new XAttribute("format", formatValue),
-                    new XAttribute("volume", volume),
-                    new XAttribute("pan", pan),
-                    new XAttribute("loopCount", loopCount));
-
-                xmlDocument.Root.Add(soundElement);
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
-            // Save the XML document to a file
-            string xmlOutputPath = "output.xml";
-            string updatedPath = ExtractCKBPath.Replace(".ckb", ".ckbx").Trim();
-            string ckbxpath = updatedPath;
-            xmlDocument.Save(updatedPath);
-            this.richTextBox1.Text = "Saved to " + updatedPath.ToString();
-
+            catch (Exception ex)
+            {
+                MessageBox.Show("An unexpected error occurred: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }
