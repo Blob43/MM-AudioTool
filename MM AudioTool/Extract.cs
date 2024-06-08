@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO; // Added for Directory, File classes
 
 namespace MM_AudioTool
 {
@@ -86,6 +87,9 @@ namespace MM_AudioTool
 
                 // Output the process standard output to a TextBox or any other control
                 this.richTextBox1.AppendText("\nProcess Output:\n" + output.ToString());
+
+                // Wait for 1 second
+                System.Threading.Thread.Sleep(1000);
 
                 // Find and rename .wav files
                 FindAndRenameWavFiles();
